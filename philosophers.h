@@ -6,7 +6,7 @@
 /*   By: jesroble <jesroble@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 13:44:47 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/26 21:23:05 by jesroble         ###   ########.fr       */
+/*   Updated: 2024/10/27 20:52:46 by jesroble         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ typedef struct s_rules
 	int					time_to_eat;
 	int					time_sleep;
 	int					nb_eat;
-	//int					total_meal;
 	long long			first_timestamp;
 	int					philo_feed;
 	bool				all_ate;
@@ -61,16 +60,18 @@ typedef struct s_rules
 }	t_rules;
 
 //main functions
-int			main(int ac, char **av);
-bool		ft_init_rules(t_rules *rules, char **av);
-bool		launcher(t_rules *rules);
+int				main(int ac, char **av);
+bool			ft_init_rules(t_rules *rules, char **av);
+bool			launcher(t_rules *rules);
 
 //utils & errors
-int			ft_atoi(char *n);
-void		print_moment(t_rules *rules, int id, char *action);
-long long	timestamp(void);
-void		wait_time(t_rules *rules, int time);
-long long	time_taken(long long past, long long present);
-void		error_msg(char *str);
+int				ft_atoi(char *n);
+void			print_moment(t_rules *rules, int id, char *action);
+long long		timestamp(void);
+void			wait_time(t_rules *rules, int time);
+long long		time_taken(long long past, long long present);
+unsigned int	fruit_generator(unsigned long time, int id);
+unsigned long	my_rand(unsigned long fruit);
+void			error_msg(char *str);
 
 #endif

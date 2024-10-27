@@ -6,7 +6,7 @@
 /*   By: jesroble <jesroble@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 22:05:23 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/26 22:17:49 by jesroble         ###   ########.fr       */
+/*   Updated: 2024/10/27 21:00:17 by jesroble         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,19 @@
 
 unsigned int	fruit_generator(unsigned long time, int id)
 {
-	long	i;
+	long	seed;
 
-	i = (long)id;
-	
+	seed = (time ^ (long)id) * 48271;
+	if (seed < 0)
+		seed *= -1;
+	return (seed);
 }
 
-unsigned int	my_rand(unsigned int fruit)
+unsigned long	my_rand(unsigned long fruit)
 {
-	unsigned int	a;
-	unsigned int	c;
-	unsigned int	m;
+	unsigned long	a;
+	unsigned long	c;
+	unsigned long	m;
 
 	a = 1103515245;
 	c = 12345;

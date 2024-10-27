@@ -6,7 +6,7 @@
 /*   By: jesroble <jesroble@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/08 18:16:46 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/26 21:48:06 by jesroble         ###   ########.fr       */
+/*   Updated: 2024/10/27 21:26:37 by jesroble         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,25 +37,28 @@ static void	philo_eats(t_philo *phi)
 
 static void	*philo_thread(void *philosopher)
 {
-	t_philo	*phi;
-	t_rules	*rules;
+	t_philo			*phi;
+	t_rules			*rules;
+	unsigned long	fruit;
 
 	phi = (t_philo *)philosopher;
 	rules = phi->rules;
 	if (phi->philo_id % 2 == 0)
 		usleep(200);
+	fruit = fruit_generator(timestamp(), phi->philo_id);
 	while (1)
 	{
 		if (rules->died || rules->all_ate)
 			break ;
 		print_moment(rules, phi->philo_id, "is thinking");
-		usleep(rand() % 1000);			//tenemos que hacer el randomizer
+		usleep(my_rand(fruit) % 1000);
 		philo_eats(phi);
 		if (rules->died || rules->all_ate)
 			break ;
 		print_moment(rules, phi->philo_id, "is sleeping");
 		wait_time(rules, rules->time_sleep);
 	}
+	//printf("Philosopher %d finished thread.\n", phi->philo_id);
 	return (NULL);
 }
 
@@ -69,10 +72,12 @@ static void	death_seeker(t_rules *rules, t_philo *p)
 		while (++i < rules->nb_philo && !rules->died)
 		{
 			pthread_mutex_lock(&(rules->eating));
+			//printf("Checking philosopher %d, last meal time: %llu\n", i, p[i].time_last_eat);
 			if (time_taken(p[i].time_last_eat, timestamp()) > rules->time_death)
 			{
 				print_moment(rules, i, "died");
 				rules->died = true;
+				//printf("Philosopher %d has died.\n", i);
 			}
 			pthread_mutex_unlock(&(rules->eating));
 			usleep(100);
@@ -81,6 +86,7 @@ static void	death_seeker(t_rules *rules, t_philo *p)
 			break ;
 		usleep(100);
 	}
+	//printf("Death seeker finished. All ate: %d, Died: %d\n", rules->all_ate, rules->died);
 }
 
 static void	finisher(t_rules *rules)

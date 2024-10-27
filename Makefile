@@ -9,6 +9,7 @@ SRCS =	main.c\
 		init.c\
 		launcher.c\
 		utils.c\
+		randomizer.c\
 
 OBJS = $(SRCS:%.c=%.o)
 
