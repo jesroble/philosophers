@@ -7,7 +7,7 @@ PRINTF = ./printf/libftprintf.a
 
 SRCS =	main.c\
 		init.c\
-		launcher.c\
+		threads.c\
 		utils.c\
 		randomizer.c\
 

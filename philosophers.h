@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philosophers.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jesroble <jesroble@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 13:44:47 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/27 20:52:46 by jesroble         ###   ########.fr       */
+/*   Updated: 2024/10/30 17:45:04 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,11 @@ typedef struct s_rules
 int				main(int ac, char **av);
 bool			ft_init_rules(t_rules *rules, char **av);
 bool			launcher(t_rules *rules);
+
+//threads
+void	*philo_thread(void *philosopher);
+void	death_seeker(t_rules *rules, t_philo *p);
+void	finisher(t_rules *rules);
 
 //utils & errors
 int				ft_atoi(char *n);

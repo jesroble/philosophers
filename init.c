@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jesroble <jesroble@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 20:23:15 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/26 21:24:55 by jesroble         ###   ########.fr       */
+/*   Updated: 2024/10/30 18:03:16 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,9 @@ bool	ft_init_rules(t_rules *rules, char **av)
 	rules->time_death = ft_atoi(av[2]);
 	rules->time_to_eat = ft_atoi(av[3]);
 	rules->time_sleep = ft_atoi(av[4]);
+	if (rules->nb_philo < 2 || rules->time_death < 1 \
+	|| rules->time_to_eat < 1 || rules->time_sleep < 1)
+		error_msg("not working values");
 	if (av[5])
 	{
 		rules->nb_eat = ft_atoi(av[5]);

@@ -3,20 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jesroble <jesroble@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 13:39:40 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/25 11:48:06 by jesroble         ###   ########.fr       */
+/*   Updated: 2024/10/30 17:38:39 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
-
-void	error_msg(char *str)
-{
-	ft_printf(RED"Error"RESET": %s", str);
-	exit (EXIT_FAILURE);
-}
 
 int	main(int ac, char **av)
 {
@@ -30,4 +24,31 @@ int	main(int ac, char **av)
 	if ((!launcher(rules)))
 		error_msg("something went wrong");
 	exit(0);
+}
+
+bool	launcher(t_rules *rules)
+{
+	int		i;
+	t_philo	*phi;
+
+	i = 0;
+	phi = rules->philo;
+	ft_printf("    Time     Philosopher       Action\n\n");
+	rules->first_timestamp = timestamp();
+	while (i < rules->nb_philo)
+	{
+		if (pthread_create(&(phi[i].thread_id), NULL, philo_thread, &(phi[i])))
+			error_msg("something went wrong creating the threads");
+		phi[i].time_last_eat = timestamp();
+		i++;
+	}
+	death_seeker(rules, rules->philo);
+	finisher(rules);
+	return (true);
+}
+
+void	error_msg(char *str)
+{
+	ft_printf(RED"Error"RESET": %s", str);
+	exit (EXIT_FAILURE);
 }
