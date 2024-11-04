@@ -75,8 +75,8 @@ void			print_moment(t_rules *rules, int id, char *action);
 long long		timestamp(void);
 void			wait_time(t_rules *rules, int time);
 long long		time_taken(long long past, long long present);
-unsigned int	fruit_generator(unsigned long time, int id);
-unsigned long	my_rand(unsigned long fruit);
+unsigned int	fruit_generator(unsigned long time, int id); //generates a ramdom n
+unsigned long	my_rand(unsigned long fruit); //randomizes the wait time for philo
 void			error_msg(char *str);
 
 #endif

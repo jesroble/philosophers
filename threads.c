@@ -119,7 +119,7 @@ void	finisher(t_rules *rules)
 	while (++i < rules->nb_philo)
 		pthread_join(rules->philo[i].thread_id, NULL);
 	i = -1;
-	while (++i < rules->nb_philo)
+	while (++i < rules->nb_philo) //esta linea hay que borrarla
 		printf("total %d meals: %d\n", i, rules->philo[i].times_ate);
 	i = -1;
 	while (++i < rules->nb_philo)

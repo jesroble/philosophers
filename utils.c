@@ -41,9 +41,9 @@ void	print_moment(t_rules *rules, int id, char *action)
 	pthread_mutex_lock(&(rules->write));
 	if (!(rules->died))
 	{
-		printf("%lli	", (timestamp() - rules->first_timestamp));
-		printf("%i	", id);
-		printf("%s	\n", action);
+		ft_printf("%lli	", (timestamp() - rules->first_timestamp));
+		ft_printf("%i	", id);
+		ft_printf("%s	\n", action);
 	}
 	pthread_mutex_unlock(&(rules->write));
 	return ;
