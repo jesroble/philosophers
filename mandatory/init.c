@@ -6,7 +6,7 @@
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 20:23:15 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/30 18:03:16 by jerope200        ###   ########.fr       */
+/*   Updated: 2024/11/05 12:08:56 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ bool	ft_init_rules(t_rules *rules, char **av)
 	{
 		rules->nb_eat = ft_atoi(av[5]);
 		if (rules->nb_eat <= 0)
-			return (false);
+			error_msg("not working values");
 	}
 	else
 		rules->nb_eat = -1;

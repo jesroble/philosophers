@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jesroble <jesroble@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 14:58:37 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/25 11:15:37 by jesroble         ###   ########.fr       */
+/*   Updated: 2024/11/05 11:46:49 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,14 +38,14 @@ int	ft_atoi(char *n)
 
 void	print_moment(t_rules *rules, int id, char *action)
 {
-	pthread_mutex_lock(&(rules->write));
+	sem_wait(rules->write);
 	if (!(rules->died))
 	{
-		ft_printf("%lli	", (timestamp() - rules->first_timestamp));
+		ft_printf("%i	", (timestamp() - rules->first_timestamp));
 		ft_printf("%i	", id);
 		ft_printf("%s	\n", action);
 	}
-	pthread_mutex_unlock(&(rules->write));
+	sem_post(rules->write);
 	return ;
 }
 

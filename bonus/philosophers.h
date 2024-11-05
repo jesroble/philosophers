@@ -6,19 +6,20 @@
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 13:44:47 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/30 17:45:04 by jerope200        ###   ########.fr       */
+/*   Updated: 2024/11/05 11:59:08 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 # include "philosophers.h"
-# include "./printf/ft_printf.h"
+# include "../printf/ft_printf.h"
 
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include <sys/time.h>
+# include <semaphore.h>
 # include <pthread.h>
 # include <stdbool.h>
 
@@ -52,10 +53,10 @@ typedef struct s_rules
 	int					philo_feed;
 	bool				all_ate;
 	bool				died;
-	pthread_mutex_t		meal_count_mutex;
-	pthread_mutex_t		eating;
-	pthread_mutex_t		write;
-	pthread_mutex_t		fork[250];
+	sem_t				*meal_count;
+	sem_t				*eating;
+	sem_t				*write;
+	sem_t				*fork;
 	t_philo				philo[250];
 }	t_rules;
 
