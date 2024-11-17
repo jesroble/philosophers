@@ -9,7 +9,6 @@ SRCS =	main.c\
 		init.c\
 		threads.c\
 		utils.c\
-		randomizer.c\
 
 OBJS = $(SRCS:%.c=%.o)
 

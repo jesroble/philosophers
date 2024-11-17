@@ -6,7 +6,7 @@
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 20:23:15 by jesroble          #+#    #+#             */
-/*   Updated: 2024/11/05 12:09:08 by jerope200        ###   ########.fr       */
+/*   Updated: 2024/11/17 14:14:57 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ bool	ft_init_rules(t_rules *rules, char **av)
 	rules->time_death = ft_atoi(av[2]);
 	rules->time_to_eat = ft_atoi(av[3]);
 	rules->time_sleep = ft_atoi(av[4]);
-	if (rules->nb_philo < 2 || rules->time_death < 1 \
+	if (rules->nb_philo < 1 || rules->time_death < 1 \
 	|| rules->time_to_eat < 1 || rules->time_sleep < 1)
 		error_msg("not working values");
 	if (av[5])

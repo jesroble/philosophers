@@ -6,7 +6,7 @@
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 13:44:47 by jesroble          #+#    #+#             */
-/*   Updated: 2024/11/05 11:27:49 by jerope200        ###   ########.fr       */
+/*   Updated: 2024/11/17 14:28:44 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,6 @@ void			print_moment(t_rules *rules, int id, char *action);
 long long		timestamp(void);
 void			wait_time(t_rules *rules, int time);
 long long		time_taken(long long past, long long present);
-unsigned int	fruit_generator(unsigned long time, int id); //generates a ramdom n
-unsigned long	my_rand(unsigned long fruit); //randomizes the wait time for philo
 void			error_msg(char *str);
 
 #endif
