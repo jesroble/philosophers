@@ -6,9 +6,10 @@
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 13:44:47 by jesroble          #+#    #+#             */
-/*   Updated: 2024/12/03 19:40:16 by jerope200        ###   ########.fr       */
+/*   Updated: 2024/12/03 19:45:32 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
@@ -64,9 +65,9 @@ bool			ft_init_rules(t_rules *rules, char **av);
 bool			launcher(t_rules *rules);
 
 //threads
-void	*philo_thread(void *philosopher);
-void	death_seeker(t_rules *rules, t_philo *p);
-void	finisher(t_rules *rules);
+void			*philo_thread(void *philosopher);
+void			death_seeker(t_rules *rules, t_philo *p);
+void			finisher(t_rules *rules);
 
 //utils & errors
 int				ft_atoi(char *n);
