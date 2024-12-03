@@ -6,14 +6,13 @@
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 13:44:47 by jesroble          #+#    #+#             */
-/*   Updated: 2024/11/17 14:28:44 by jerope200        ###   ########.fr       */
+/*   Updated: 2024/12/03 19:40:16 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 # include "philosophers.h"
-# include "../printf/ft_printf.h"
 
 # include <stdio.h>
 # include <stdlib.h>

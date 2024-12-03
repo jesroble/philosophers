@@ -6,7 +6,7 @@
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 10:28:56 by jesroble          #+#    #+#             */
-/*   Updated: 2024/11/17 14:15:59 by jerope200        ###   ########.fr       */
+/*   Updated: 2024/11/19 18:26:57 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,34 +36,32 @@ int	ft_atoi(char *n)
 	return (result);
 }
 
-void	print_moment(t_rules *rules, int id, char *action)
+void print_moment(t_rules *rules, int id, char *action)
 {
-	static int	header_printed = 0;
-
-	pthread_mutex_lock(&(rules->write));
-	if (!header_printed)
-	{
-		printf("   Time    Philosopher      Action\n");
-		printf("---------------------------------------\n");
-		header_printed = 1;
-	}
-	if (!(rules->died))
-	{
-		printf("%-8lli       %-8i    %-20s\n",
-			(timestamp() - rules->first_timestamp),
-			id + 1, action);
-	}
-	pthread_mutex_unlock(&(rules->write));
+ 	pthread_mutex_lock(&(rules->write));
+    if (!(rules->died || rules->all_ate))
+    {
+        printf("%-8lli       %-8i    %-20s\n",
+               (timestamp() - rules->first_timestamp),
+               id + 1, action);
+    }
+    pthread_mutex_unlock(&(rules->write));
 }
+
 
 void wait_time(t_rules *rules, int time_in_ms)
 {
     long long start_time = timestamp();
     
-    while (!rules->died)
+    while (1)
     {
-        if (time_taken(start_time, timestamp()) >= time_in_ms)
+        pthread_mutex_lock(&(rules->meal_count_mutex));
+        if (rules->died || time_taken(start_time, timestamp()) >= time_in_ms)
+        {
+            pthread_mutex_unlock(&(rules->meal_count_mutex));
             break;
+        }
+        pthread_mutex_unlock(&(rules->meal_count_mutex));
         usleep(100);
     }
 }
