@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
+/*   By: jesroble <jesroble@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 10:28:56 by jesroble          #+#    #+#             */
-/*   Updated: 2024/11/17 14:15:59 by jerope200        ###   ########.fr       */
+/*   Updated: 2024/12/03 19:10:00 by jesroble         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,16 +56,17 @@ void	print_moment(t_rules *rules, int id, char *action)
 	pthread_mutex_unlock(&(rules->write));
 }
 
-void wait_time(t_rules *rules, int time_in_ms)
+void	wait_time(t_rules *rules, int time_in_ms)
 {
-    long long start_time = timestamp();
-    
-    while (!rules->died)
-    {
-        if (time_taken(start_time, timestamp()) >= time_in_ms)
-            break;
-        usleep(100);
-    }
+	long long	start_time;
+
+	start_time = timestamp();
+	while (!rules->died)
+	{
+		if (time_taken(start_time, timestamp()) >= time_in_ms)
+			break ;
+		usleep(100);
+	}
 }
 
 long long	time_taken(long long past, long long present)
