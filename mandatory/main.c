@@ -5,50 +5,96 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/04 13:39:40 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/30 17:38:39 by jerope200        ###   ########.fr       */
+/*   Created: 2024/12/04 12:33:02 by jerope200         #+#    #+#             */
+/*   Updated: 2024/12/04 12:33:10 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-int	main(int ac, char **av)
+int	check_death(t_data *data, t_philo *philo)
 {
-	t_rules	*rules;
-
-	rules = malloc(sizeof(t_rules));
-	if (ac != 5 && ac != 6)
-		error_msg(USAGE);
-	if ((!ft_init_rules(rules, av)))
-		error_msg("threats could not be created");
-	if ((!launcher(rules)))
-		error_msg("something went wrong");
-	exit(0);
+    pthread_mutex_lock(&data->dead_mutex);
+    if (data->dead)
+    {
+        pthread_mutex_unlock(&data->dead_mutex);
+        return (1);
+    }
+    if (get_time() - philo->last_meal > data->time_to_die)
+    {
+        data->dead = 1;
+        pthread_mutex_unlock(&data->dead_mutex);
+        print_status(data, philo->id, "died");
+        return (1);
+    }
+    pthread_mutex_unlock(&data->dead_mutex);
+    return (0);
 }
 
-bool	launcher(t_rules *rules)
+void	monitor(t_data *data)
 {
-	int		i;
-	t_philo	*phi;
+    int	i;
+    int	all_ate;
 
-	i = 0;
-	phi = rules->philo;
-	ft_printf("    Time     Philosopher       Action\n\n");
-	rules->first_timestamp = timestamp();
-	while (i < rules->nb_philo)
-	{
-		if (pthread_create(&(phi[i].thread_id), NULL, philo_thread, &(phi[i])))
-			error_msg("something went wrong creating the threads");
-		phi[i].time_last_eat = timestamp();
-		i++;
-	}
-	death_seeker(rules, rules->philo);
-	finisher(rules);
-	return (true);
+    while (!data->dead)
+    {
+        i = -1;
+        all_ate = 1;
+        while (++i < data->num_philos)
+        {
+            if (check_death(data, &data->philos[i]))
+                return ;
+            if (data->must_eat_count != -1 && 
+                data->philos[i].eat_count < data->must_eat_count)
+                all_ate = 0;
+        }
+        if (data->must_eat_count != -1 && all_ate)
+        {
+            pthread_mutex_lock(&data->dead_mutex);
+            data->dead = 1;
+            pthread_mutex_unlock(&data->dead_mutex);
+            return ;
+        }
+        usleep(1000);
+    }
 }
 
-void	error_msg(char *str)
+int	start_simulation(t_data *data)
 {
-	ft_printf(RED"Error"RESET": %s", str);
-	exit (EXIT_FAILURE);
+    int	i;
+
+    data->start_time = get_time();
+    i = -1;
+    while (++i < data->num_philos)
+    {
+        data->philos[i].last_meal = get_time();
+        if (pthread_create(&data->philos[i].thread, NULL, 
+            philosopher, &data->philos[i]))
+            return (1);
+    }
+    monitor(data);
+    i = -1;
+    while (++i < data->num_philos)
+        pthread_join(data->philos[i].thread, NULL);
+    return (0);
+}
+
+int	main(int argc, char **argv)
+{
+    t_data	data;
+
+    if (argc != 5 && argc != 6)
+    {
+        printf("Error: wrong number of arguments\n");
+        return (1);
+    }
+    if (init_data(&data, argc, argv))
+        return (1);
+    if (init_mutex(&data))
+        return (1);
+    if (init_philos(&data))
+        return (1);
+    if (start_simulation(&data))
+        return (1);
+    return (0);
 }

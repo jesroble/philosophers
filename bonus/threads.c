@@ -5,117 +5,65 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/07 10:16:18 by jesroble          #+#    #+#             */
-/*   Updated: 2024/11/17 14:25:45 by jerope200        ###   ########.fr       */
+/*   Created: 2024/12/04 12:33:54 by jerope200         #+#    #+#             */
+/*   Updated: 2024/12/04 12:33:56 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philosophers.h"
+#include "philo_bonus.h"
 
-static void philo_alone(t_philo *phi)
+void *check_death(void *arg)
 {
-    t_rules *rules;
-
-    rules = phi->rules;
-    sem_wait(rules->fork);
-    print_moment(rules, phi->philo_id, "has taken left fork");
-    wait_time(rules, rules->time_death);
-    print_moment(rules, phi->philo_id, "died");
-    rules->died = true;
-    sem_post(rules->fork);
-}
-
-static void philo_eats(t_philo *phi)
-{
-    t_rules *rules;
-
-    rules = phi->rules;
-    sem_wait(rules->fork);
-    print_moment(rules, phi->philo_id, "has taken left  fork");
-    sem_wait(rules->fork);
-    print_moment(rules, phi->philo_id, "has taken right fork");
-    sem_wait(rules->eating);
-    print_moment(rules, phi->philo_id, "is eating");
-    phi->time_last_eat = timestamp();
-    sem_post(rules->eating);
-    wait_time(rules, rules->time_to_eat);
-    sem_wait(rules->meal_count);
-    phi->times_ate++;
-    if (phi->times_ate == rules->nb_eat)
-        rules->philo_feed++;
-    if (rules->philo_feed == rules->nb_philo)
-        rules->all_ate = true;
-    sem_post(rules->meal_count);
-    sem_post(rules->fork);
-    sem_post(rules->fork);
-}
-
-void *philo_thread(void *philosopher)
-{
-    t_philo *phi = (t_philo *)philosopher;
-    t_rules *rules = phi->rules;
-
-    sem_wait(rules->eating);
-    phi->time_last_eat = timestamp();
-    sem_post(rules->eating);
-    if (phi->philo_id % 2)
-        usleep(500);
-    while (!rules->died && !rules->all_ate)
+    t_philo *philo;
+    long current_time;
+    
+    philo = (t_philo *)arg;
+    while (1)
     {
-        if (rules->nb_philo == 1)
-            philo_alone(phi);
-        else
-            philo_eats(phi);
-        if (rules->died || rules->all_ate)
-            break;
-        print_moment(rules, phi->philo_id, "is sleeping");
-        wait_time(rules, rules->time_sleep);
-        print_moment(rules, phi->philo_id, "is thinking");
-        usleep(100);
-    }
-    return NULL;
-}
-
-void death_seeker(t_rules *rules, t_philo *philos)
-{
-    int i;
-    long long current_time;
-
-    while (!rules->died && !rules->all_ate)
-    {
-        i = 0;
-        while (i < rules->nb_philo && !rules->died)
+        current_time = get_time();
+        if (current_time - philo->last_meal > philo->data->time_to_die)
         {
-            current_time = timestamp();
-            sem_wait(rules->eating);
-            if (time_taken(philos[i].time_last_eat, current_time) > rules->time_death)
-            {
-                print_moment(rules, philos[i].philo_id + 1, "died");
-                rules->died = true;
-                sem_post(rules->eating);
-                return;
-            }
-            sem_post(rules->eating);
-            i++;
-            usleep(100);
+            sem_wait(philo->data->print_sem);
+            printf("%ld %d died\n", current_time - philo->data->start_time, philo->id);
+            sem_post(philo->data->death_sem);
+            exit(1);
         }
+        precise_sleep(1);
     }
+    return (NULL);
 }
 
-void	finisher(t_rules *rules)
+static void eat(t_philo *philo)
 {
-	int	i;
+    sem_wait(philo->data->forks);
+    print_status(philo->data, philo->id, "has taken a fork");
+    sem_wait(philo->data->forks);
+    print_status(philo->data, philo->id, "has taken a fork");
+    
+    print_status(philo->data, philo->id, "is eating");
+    philo->last_meal = get_time();
+    precise_sleep(philo->data->time_to_eat);
+    philo->meals_eaten++;
+    
+    sem_post(philo->data->forks);
+    sem_post(philo->data->forks);
+}
 
-	i = -1;
-	while (++i < rules->nb_philo)
-		pthread_join(rules->philo[i].thread_id, NULL);
-	i = -1;
-	sem_close(rules->fork);
-	sem_close(rules->meal_count);
-	sem_close(rules->write);
-	sem_close(rules->eating);
-	sem_unlink("/fork");
-	sem_unlink("/meal_count");
-	sem_unlink("/write");
-	sem_unlink("/eating");
+void philosopher_routine(t_philo *philo)
+{
+    pthread_create(&philo->death_thread, NULL, check_death, philo);
+    pthread_detach(philo->death_thread);
+    
+    if (philo->id % 2 == 0)
+        precise_sleep(philo->data->time_to_eat / 2);
+        
+    while (philo->data->must_eat_count == -1 || 
+           philo->meals_eaten < philo->data->must_eat_count)
+    {
+        eat(philo);
+        print_status(philo->data, philo->id, "is sleeping");
+        precise_sleep(philo->data->time_to_sleep);
+        print_status(philo->data, philo->id, "is thinking");
+    }
+    exit(0);
 }

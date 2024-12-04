@@ -5,71 +5,60 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/05 20:23:15 by jesroble          #+#    #+#             */
-/*   Updated: 2024/11/17 13:23:44 by jerope200        ###   ########.fr       */
+/*   Created: 2024/12/04 12:33:15 by jerope200         #+#    #+#             */
+/*   Updated: 2024/12/04 12:33:19 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-static int	init_mutex(t_rules *rules)
+int	init_data(t_data *data, int argc, char **argv)
 {
-	int	i;
-
-	i = rules->nb_philo;
-	while (--i >= 0)
-	{
-		if (pthread_mutex_init(&(rules->fork[i]), NULL))
-			return (1);
-	}
-	if (pthread_mutex_init(&(rules->meal_count_mutex), NULL))
-		return (1);
-	if (pthread_mutex_init(&(rules->write), NULL))
-		return (1);
-	if (pthread_mutex_init(&(rules->eating), NULL))
-		return (1);
-	return (0);
+    data->num_philos = ft_atoi(argv[1]);
+    data->time_to_die = ft_atoi(argv[2]);
+    data->time_to_eat = ft_atoi(argv[3]);
+    data->time_to_sleep = ft_atoi(argv[4]);
+    if (argc == 6)
+        data->must_eat_count = ft_atoi(argv[5]);
+    else
+        data->must_eat_count = -1;
+    data->dead = 0;
+    if (data->num_philos < 1 || data->time_to_die < 0 || data->time_to_eat < 0
+        || data->time_to_sleep < 0 || (argc == 6 && data->must_eat_count < 0))
+        return (1);
+    return (0);
 }
 
-static void	init_philo(t_rules *rules)
+int	init_mutex(t_data *data)
 {
-	t_philo	*philo;
-	int		i;
+    int	i;
 
-	philo = rules->philo;
-	i = rules->nb_philo;
-	while (i--)
-	{
-		philo[i].philo_id = i;
-		philo[i].left_fork_id = i;
-		philo[i].right_fork_id = (i + 1) % rules->nb_philo;
-		philo[i].times_ate = 0;
-		philo[i].time_last_eat = 0;
-		philo[i].rules = rules;
-	}
+    data->forks = malloc(sizeof(pthread_mutex_t) * data->num_philos);
+    if (!data->forks)
+        return (1);
+    i = -1;
+    while (++i < data->num_philos)
+        pthread_mutex_init(&data->forks[i], NULL);
+    pthread_mutex_init(&data->write_mutex, NULL);
+    pthread_mutex_init(&data->dead_mutex, NULL);
+    return (0);
 }
 
-bool	ft_init_rules(t_rules *rules, char **av)
+int	init_philos(t_data *data)
 {
-	rules->nb_philo = ft_atoi(av[1]);
-	rules->time_death = ft_atoi(av[2]);
-	rules->time_to_eat = ft_atoi(av[3]);
-	rules->time_sleep = ft_atoi(av[4]);
-	if (rules->nb_philo < 1 || rules->time_death < 1 \
-	|| rules->time_to_eat < 1 || rules->time_sleep < 1)
-		error_msg("not working values");
-	if (av[5])
-	{
-		rules->nb_eat = ft_atoi(av[5]);
-		if (rules->nb_eat <= 0)
-			error_msg("not working values");
-	}
-	else
-		rules->nb_eat = -1;
-	rules->philo_feed = 0;
-	rules->all_ate = false;
-	rules->died = false;
-	init_mutex(rules);
-	init_philo(rules);
-	return (true);
+    int	i;
+
+    data->philos = malloc(sizeof(t_philo) * data->num_philos);
+    if (!data->philos)
+        return (1);
+    i = -1;
+    while (++i < data->num_philos)
+    {
+        data->philos[i].id = i + 1;
+        data->philos[i].left_fork = i;
+        data->philos[i].right_fork = (i + 1) % data->num_philos;
+        data->philos[i].eat_count = 0;
+        data->philos[i].data = data;
+    }
+    return (0);
 }

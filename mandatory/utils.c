@@ -5,77 +5,58 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/07 10:28:56 by jesroble          #+#    #+#             */
-/*   Updated: 2024/12/03 19:47:31 by jerope200        ###   ########.fr       */
+/*   Created: 2024/12/04 12:33:40 by jerope200         #+#    #+#             */
+/*   Updated: 2024/12/04 12:33:42 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-int	ft_atoi(char *n)
+long long	get_time(void)
 {
-	int	result;
+    struct timeval	tv;
 
-	result = 0;
-	while ((*n >= 9 && *n <= 13) || *n == 32)
-		n++;
-	if (*n == '-')
-		return (-1);
-	if (*n == '+')
-		n++;
-	while (*n)
-	{
-		if (*n >= '0' && *n <= '9')
-		{
-			result = result * 10 + (*n - '0');
-			n++;
-		}
-		else
-			return (-1);
-	}
-	return (result);
+    gettimeofday(&tv, NULL);
+    return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 }
 
-void print_moment(t_rules *rules, int id, char *action)
+void	print_status(t_data *data, int id, char *status)
 {
- 	pthread_mutex_lock(&(rules->write));
-    if (!(rules->died || rules->all_ate))
-    {
-        printf("%-8lli       %-8i    %-20s\n",
-               (timestamp() - rules->first_timestamp),
-               id + 1, action);
-    }
-    pthread_mutex_unlock(&(rules->write));
+    pthread_mutex_lock(&data->write_mutex);
+    if (!data->dead || !strcmp(status, "died"))
+        printf("%lld %d %s\n", get_time() - data->start_time, id, status);
+    pthread_mutex_unlock(&data->write_mutex);
 }
 
-
-void wait_time(t_rules *rules, int time_in_ms)
+void	smart_sleep(long long time, t_data *data)
 {
-    long long start_time = timestamp();
-    
-    while (1)
+    long long	start;
+
+    start = get_time();
+    while (!data->dead)
     {
-        pthread_mutex_lock(&(rules->meal_count_mutex));
-        if (rules->died || time_taken(start_time, timestamp()) >= time_in_ms)
-        {
-            pthread_mutex_unlock(&(rules->meal_count_mutex));
-            break;
-        }
-        pthread_mutex_unlock(&(rules->meal_count_mutex));
+        if (get_time() - start >= time)
+            break ;
         usleep(100);
     }
 }
-
-long long	time_taken(long long past, long long present)
+int	ft_atoi(const char *str)
 {
-	return (present - past);
-}
+    int	res;
+    int	sign;
 
-
-long long	timestamp(void)
-{
-	struct timeval	time;
-
-	gettimeofday(&time, NULL);
-	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+    res = 0;
+    sign = 1;
+    while (*str == ' ' || (*str >= 9 && *str <= 13))
+        str++;
+    if (*str == '-')
+        sign = -1;
+    if (*str == '-' || *str == '+')
+        str++;
+    while (*str >= '0' && *str <= '9')
+    {
+        res = res * 10 + (*str - '0');
+        str++;
+    }
+    return (res * sign);
 }

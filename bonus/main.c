@@ -5,50 +5,79 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/04 13:39:40 by jesroble          #+#    #+#             */
-/*   Updated: 2024/10/30 17:38:39 by jerope200        ###   ########.fr       */
+/*   Created: 2024/12/04 12:34:02 by jerope200         #+#    #+#             */
+/*   Updated: 2024/12/04 12:34:03 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philosophers.h"
+#include "philo_bonus.h"
 
-int	main(int ac, char **av)
+static void wait_children(t_data *data)
 {
-	t_rules	*rules;
-
-	rules = malloc(sizeof(t_rules));
-	if (ac != 5 && ac != 6)
-		error_msg(USAGE);
-	if ((!ft_init_rules(rules, av)))
-		error_msg("threats could not be created");
-	if ((!launcher(rules)))
-		error_msg("something went wrong");
-	exit(0);
+    int status;
+    int i;
+    
+    i = 0;
+    while (i < data->num_philos)
+    {
+        waitpid(-1, &status, 0);
+        if (WEXITSTATUS(status) == 1)
+        {
+            i = 0;
+            while (i < data->num_philos)
+            {
+                if (data->pids[i] != 0)
+                    kill(data->pids[i], SIGTERM);
+                i++;
+            }
+            break;
+        }
+        i++;
+    }
 }
 
-bool	launcher(t_rules *rules)
+static void create_philosophers(t_data *data)
 {
-	int		i;
-	t_philo	*phi;
-
-	i = 0;
-	phi = rules->philo;
-	ft_printf("    Time     Philosopher       Action\n\n");
-	rules->first_timestamp = timestamp();
-	while (i < rules->nb_philo)
-	{
-		if (pthread_create(&(phi[i].thread_id), NULL, philo_thread, &(phi[i])))
-			error_msg("something went wrong creating the threads");
-		phi[i].time_last_eat = timestamp();
-		i++;
-	}
-	death_seeker(rules, rules->philo);
-	finisher(rules);
-	return (true);
+    t_philo philo;
+    int i;
+    
+    i = 0;
+    while (i < data->num_philos)
+    {
+        philo.id = i + 1;
+        philo.meals_eaten = 0;
+        philo.data = data;
+        philo.last_meal = get_time();
+        
+        data->pids[i] = fork();
+        if (data->pids[i] == 0)
+        {
+            philosopher_routine(&philo);
+            exit(0);
+        }
+        i++;
+    }
+    wait_children(data);
 }
 
-void	error_msg(char *str)
+int main(int argc, char **argv)
 {
-	ft_printf(RED"Error"RESET": %s", str);
-	exit (EXIT_FAILURE);
+    t_data data;
+    
+    if (argc != 5 && argc != 6)
+    {
+        printf("Error: wrong number of arguments\n");
+        return (1);
+    }
+    if (init_data(&data, argc, argv) != 0)
+        return (1);
+        
+    if (init_semaphores(&data) != 0)
+    {
+        clean_all(&data);
+        return (1);
+    }
+    create_philosophers(&data);
+    clean_all(&data);
+    return (0);
 }

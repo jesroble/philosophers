@@ -5,76 +5,66 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/04 13:44:47 by jesroble          #+#    #+#             */
-/*   Updated: 2024/12/03 19:45:32 by jerope200        ###   ########.fr       */
+/*   Created: 2024/12/04 12:33:26 by jerope200         #+#    #+#             */
+/*   Updated: 2024/12/04 12:33:29 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
-# include "philosophers.h"
 
+# include <pthread.h>
 # include <stdio.h>
 # include <stdlib.h>
-# include <unistd.h>
 # include <sys/time.h>
-# include <pthread.h>
-# include <stdbool.h>
+# include <unistd.h>
+#include <string.h>
 
-# define USAGE "Usage: number_of_philosophers, time_to_die, \
-time_to_eat, time_to_sleep, [number_of_times_each_philosopher_must_eat]"
 
-# define RED "\x1B[31m"
-# define RESET "\x1B[0m"
+typedef struct s_philo	t_philo;
+typedef struct s_data	t_data;
 
-struct	s_rules;
-
-typedef struct s_philo
+struct s_data
 {
-	int				philo_id;
-	int				left_fork_id;
-	int				right_fork_id;
-	int				times_ate;
-	long long		time_last_eat;
-	struct s_rules	*rules;
-	pthread_t		thread_id;
-}	t_philo;
+    int             num_philos;
+    int             time_to_die;
+    int             time_to_eat;
+    int             time_to_sleep;
+    int             must_eat_count;
+    int             dead;
+    long long       start_time;
+    pthread_mutex_t *forks;
+    pthread_mutex_t write_mutex;
+    pthread_mutex_t dead_mutex;
+    t_philo         *philos;
+};
 
-typedef struct s_rules
+struct s_philo
 {
-	int					nb_philo;
-	int					time_death;
-	int					time_to_eat;
-	int					time_sleep;
-	int					nb_eat;
-	long long			first_timestamp;
-	int					philo_feed;
-	bool				all_ate;
-	bool				died;
-	pthread_mutex_t		meal_count_mutex;
-	pthread_mutex_t		eating;
-	pthread_mutex_t		write;
-	pthread_mutex_t		fork[250];
-	t_philo				philo[250];
-}	t_rules;
+    int             id;
+    int             left_fork;
+    int             right_fork;
+    int             eat_count;
+    long long       last_meal;
+    pthread_t       thread;
+    t_data          *data;
+};
 
-//main functions
-int				main(int ac, char **av);
-bool			ft_init_rules(t_rules *rules, char **av);
-bool			launcher(t_rules *rules);
+// utils.c
+long long	get_time(void);
+void		print_status(t_data *data, int id, char *status);
+void		smart_sleep(long long time, t_data *data);
+int			check_death(t_data *data, t_philo *philo);
 
-//threads
-void			*philo_thread(void *philosopher);
-void			death_seeker(t_rules *rules, t_philo *p);
-void			finisher(t_rules *rules);
+// init.c
+int			init_data(t_data *data, int argc, char **argv);
+int			init_mutex(t_data *data);
+int			init_philos(t_data *data);
+int	        ft_atoi(const char *str);
 
-//utils & errors
-int				ft_atoi(char *n);
-void			print_moment(t_rules *rules, int id, char *action);
-long long		timestamp(void);
-void			wait_time(t_rules *rules, int time);
-long long		time_taken(long long past, long long present);
-void			error_msg(char *str);
+// actions.c
+void		*philosopher(void *arg);
+void		eating(t_philo *philo);
+void        handle_single_philosopher(t_philo *philo);
 
 #endif

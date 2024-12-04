@@ -5,79 +5,85 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jerope200 <jerope200@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/07 10:28:56 by jesroble          #+#    #+#             */
-/*   Updated: 2024/11/17 14:17:44 by jerope200        ###   ########.fr       */
+/*   Created: 2024/12/04 12:33:51 by jerope200         #+#    #+#             */
+/*   Updated: 2024/12/04 12:33:52 by jerope200        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philosophers.h"
+#include "philo_bonus.h"
 
-int	ft_atoi(char *n)
+long get_time(void)
 {
-	int	result;
-
-	result = 0;
-	while ((*n >= 9 && *n <= 13) || *n == 32)
-		n++;
-	if (*n == '-')
-		return (-1);
-	if (*n == '+')
-		n++;
-	while (*n)
-	{
-		if (*n >= '0' && *n <= '9')
-		{
-			result = result * 10 + (*n - '0');
-			n++;
-		}
-		else
-			return (-1);
-	}
-	return (result);
-}
-
-void	print_moment(t_rules *rules, int id, char *action)
-{
-	static int	header_printed = 0;
-
-	sem_wait(rules->write);
-	if (!header_printed)
-	{
-		printf("   Time    Philosopher      Action\n");
-		printf("---------------------------------------\n");
-		header_printed = 1;
-	}
-	if (!(rules->died))
-	{
-		printf("%-8lli       %-8i    %-20s\n",
-			(timestamp() - rules->first_timestamp),
-			id + 1, action);
-	}
-	sem_post(rules->write);
-}
-
-void wait_time(t_rules *rules, int time_in_ms)
-{
-    long long start_time = timestamp();
+    struct timeval tv;
     
-    while (!rules->died)
+    gettimeofday(&tv, NULL);
+    return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
+}
+
+void precise_sleep(int ms)
+{
+    long start;
+    long current;
+    
+    start = get_time();
+    while (1)
     {
-        if (time_taken(start_time, timestamp()) >= time_in_ms)
+        current = get_time();
+        if (current - start >= ms)
             break;
         usleep(100);
     }
 }
 
-long long	time_taken(long long past, long long present)
+void print_status(t_data *data, int id, char *status)
 {
-	return (present - past);
+    sem_wait(data->print_sem);
+    printf("%ld %d %s\n", get_time() - data->start_time, id, status);
+    sem_post(data->print_sem);
 }
 
-
-long long	timestamp(void)
+int init_semaphores(t_data *data)
 {
-	struct timeval	time;
+    sem_unlink("/forks");
+    sem_unlink("/print");
+    sem_unlink("/death");
+    
+    data->forks = sem_open("/forks", O_CREAT, 0644, data->num_philos);
+    data->print_sem = sem_open("/print", O_CREAT, 0644, 1);
+    data->death_sem = sem_open("/death", O_CREAT, 0644, 0);
+    
+    if (data->forks == SEM_FAILED || data->print_sem == SEM_FAILED || 
+        data->death_sem == SEM_FAILED)
+        return (1);
+    return (0);
+}
 
-	gettimeofday(&time, NULL);
-	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+void clean_semaphores(t_data *data)
+{
+    sem_close(data->forks);
+    sem_close(data->print_sem);
+    sem_close(data->death_sem);
+    sem_unlink("/forks");
+    sem_unlink("/print");
+    sem_unlink("/death");
+}
+int	ft_atoi(const char *str)
+{
+    int	res;
+    int	sign;
+
+    res = 0;
+    sign = 1;
+    while (*str == ' ' || (*str >= 9 && *str <= 13))
+        str++;
+    if (*str == '-')
+        sign = -1;
+    if (*str == '-' || *str == '+')
+        str++;
+    while (*str >= '0' && *str <= '9')
+    {
+        res = res * 10 + (*str - '0');
+        str++;
+    }
+    return (res * sign);
 }
